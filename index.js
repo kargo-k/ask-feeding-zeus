@@ -24,9 +24,10 @@ const HasPetNameLaunchRequestHandler = {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes() || {};
 
-    const name = sessionAttributes.hasOwnProperty("name")
-      ? sessionAttributes.name
-      : 0;
+    const name = sessionAttributes.hasOwnProperty("name") ? sessionAttributes.name : 0;
+    const fedTime = sessionAttributes.hasOwnProperty("fedTime") ? sessionAttributes.fedTime : 0;
+    const fedDate = sessionAttributes.hasOwnProperty("fedDate") ? sessionAttributes.fedDate : 0;
+    // const fedDuration = sessionAttributes.hasOwnProperty("fedDuration") ? sessionAttributes.fedDuration : 0;
 
     return (
       handlerInput.requestEnvelope.request.type === "LaunchRequest" && name
@@ -39,14 +40,14 @@ const HasPetNameLaunchRequestHandler = {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes() || {};
 
-    const name = sessionAttributes.hasOwnProperty("name")
-      ? sessionAttributes.name
-      : 0;
+    const name = sessionAttributes.hasOwnProperty("name") ? sessionAttributes.name : 0;
+    const fedTime = sessionAttributes.hasOwnProperty("fedTime") ? sessionAttributes.fedTime : 0;
+    const fedDate = sessionAttributes.hasOwnProperty("fedDate") ? sessionAttributes.fedDate : 0;
+    // const fedDuration = sessionAttributes.hasOwnProperty("fedDuration") ? sessionAttributes.fedDuration : 0;
 
-    // TODO:: Use the settings API to get current date and then compute how many days until user's birthday
-    // TODO:: Say Happy birthday on the user's birthday
+    // TODO:: Use the settings API to get current time and compute how long ago the pet was fed last
 
-    const speechText = `Welcome back. It looks like there are X more days until your y-th birthday.`;
+    const speechText = `${name} is a good boy today! ${name} was last fed at ${fedTime} on ${fedDate}`;
 
     return handlerInput.responseBuilder.speak(speechText).getResponse();
   }
@@ -58,7 +59,7 @@ const CapturePetNameIntentHandler = {
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
       handlerInput.requestEnvelope.request.intent.name ===
-        "CapturePetNameIntent"
+      "CapturePetNameIntent"
     );
   },
   async handle(handlerInput) {
@@ -72,15 +73,52 @@ const CapturePetNameIntentHandler = {
     attributesManager.setPersistentAttributes(petAttributes);
     await attributesManager.savePersistentAttributes();
 
-    const speechText = `Thanks, I'll remember ${name}'s name.`;
+    const speechText = `Thanks, I'll remember ${name}'s name.  When was the last time you fed ${name}?`;
     return (
       handlerInput.responseBuilder
         .speak(speechText)
-        //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
         .getResponse()
     );
   }
 };
+
+// acknowledge that the user told alexa when pet was last fed and confirm date/time back to user
+const CaptureLastFedIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+      handlerInput.requestEnvelope.request.intent.name === "CaptureLastFedIntent"
+    );
+  },
+  async handle(handlerInput) {
+    const fedTime = handlerInput.requestEnvelope.request.intent.slots.time.value;
+    const fedDate = handlerInput.requestEnvelope.request.intent.slots.day.value;
+    // const fedDuration = handlerInput.requestEnvelope.request.intent.slots.duration.value;
+
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes() || {};
+
+    const name = sessionAttributes.hasOwnProperty("name") ? sessionAttributes.name : 0;
+
+    const petAttributes = {
+      name: name,
+      fedTime: fedTime,
+      fedDate: fedDate
+    }
+
+    attributesManager.setPersistentAttributes(petAttributes);
+    await attributesManager.savePersistentAttributes();
+
+    const speechText = `I'll remember you fed ${name} at ${fedTime} on ${fedDate}`;
+    return (
+      handlerInput.responseBuilder
+        .speak(speechText)
+        .getResponse();
+    );
+
+  }
+}
+
 const HelpIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -104,7 +142,7 @@ const CancelAndStopIntentHandler = {
       (handlerInput.requestEnvelope.request.intent.name ===
         "AMAZON.CancelIntent" ||
         handlerInput.requestEnvelope.request.intent.name ===
-          "AMAZON.StopIntent")
+        "AMAZON.StopIntent")
     );
   },
   handle(handlerInput) {
@@ -168,11 +206,11 @@ const LoadPetNameInterceptor = {
     const sessionAttributes =
       (await attributesManager.getPersistentAttributes()) || {};
 
-    const name = sessionAttributes.hasOwnProperty("name")
-      ? sessionAttributes.name
-      : 0;
+    const name = sessionAttributes.hasOwnProperty("name") ? sessionAttributes.name : 0;
+    const fedTime = sessionAttributes.hasOwnProperty("fedTime") ? sessionAttributes.fedTime : 0;
+    const fedDate = sessionAttributes.hasOwnProperty("fedDate") ? sessionAttributes.fedDate : 0;
 
-    if (name) {
+    if (name && fedTime && fedDate) {
       attributesManager.setSessionAttributes(sessionAttributes);
     }
   }
@@ -192,6 +230,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     HasPetNameLaunchRequestHandler,
     LaunchRequestHandler,
     CapturePetNameIntentHandler,
+    CaptureLastFedIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,
