@@ -41,13 +41,10 @@ const HasPetNameLaunchRequestHandler = {
     const sessionAttributes = attributesManager.getSessionAttributes() || {};
 
     const name = sessionAttributes.hasOwnProperty("name") ? sessionAttributes.name : 0;
-    const fedTime = sessionAttributes.hasOwnProperty("fedTime") ? sessionAttributes.fedTime : 0;
-    const fedDate = sessionAttributes.hasOwnProperty("fedDate") ? sessionAttributes.fedDate : 0;
-    // const fedDuration = sessionAttributes.hasOwnProperty("fedDuration") ? sessionAttributes.fedDuration : 0;
 
     // TODO:: Use the settings API to get current time and compute how long ago the pet was fed last
 
-    const speechText = `${name} is a good boy today! ${name} was last fed at ${fedTime} on ${fedDate}`;
+    const speechText = `${name} is a good boy today!`;
 
     return handlerInput.responseBuilder.speak(speechText).getResponse();
   }
@@ -113,7 +110,6 @@ const CaptureLastFedIntentHandler = {
     return (
       handlerInput.responseBuilder
         .speak(speechText)
-        .getResponse();
     );
 
   }
@@ -206,11 +202,11 @@ const LoadPetNameInterceptor = {
     const sessionAttributes =
       (await attributesManager.getPersistentAttributes()) || {};
 
-    const name = sessionAttributes.hasOwnProperty("name") ? sessionAttributes.name : 0;
-    const fedTime = sessionAttributes.hasOwnProperty("fedTime") ? sessionAttributes.fedTime : 0;
-    const fedDate = sessionAttributes.hasOwnProperty("fedDate") ? sessionAttributes.fedDate : 0;
+    const name = sessionAttributes.hasOwnProperty("name")
+      ? sessionAttributes.name
+      : 0;
 
-    if (name && fedTime && fedDate) {
+    if (name) {
       attributesManager.setSessionAttributes(sessionAttributes);
     }
   }
