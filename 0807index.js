@@ -44,40 +44,62 @@ const HasPetNameLaunchRequestHandler = {
     const fedDate = sessionAttributes.hasOwnProperty("fedDate") ? sessionAttributes.fedDate : 0;
 
     // TODO:: Use the settings API to get current time and compute how long ago the pet was fed last
-
+    
     let speechText = `${name} is a good boy today!`;
-    let appendDate = " "
-    let appendTime = " "
-    const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD string 
-
+    let appendDate
+    let appendTime
+    const today = new Date().getDay()
+    
     if (fedDate !== 0) {
-      if (today === fedDate) {
-        appendDate = 'today ';
-      } else if (today.slice(8, 10) - fedDate.slice(8, 10) === 1 || today.slice(8, 10) - fedDate.slice(8, 10) < 0) {
-        appendDate = 'yesterday ';
-      } else {
-        appendDate = ` <say-as interpret-as="date">${fedDate.slice(8, 10)}</say-as> `
-      }
+        if (today - fedDate === 0) {
+            appendDate = 'today';
+        } else if (today - fedDate === 1 || today - fedDate === -6) {
+            appendDate = 'yesterday';
+        } else {
+            switch (fedDate) {
+                case 0:
+                    appendDate = 'Sunday';
+                    break;
+                case 1:
+                    appendDate = 'Monday';
+                    break;
+                case 2:
+                    appendDate = 'Tuesday';
+                    break;
+                case 3:
+                    appendDate = 'Wednesday';
+                    break;
+                case 4:
+                    appendDate = 'Thursday';
+                    break;
+                case 5:
+                    appendDate = 'Friday';
+                    break;
+                case 6:
+                    appendDate = 'Saturday';
+                    break;
+            }
+        }
     }
-
+    
     if (fedTime !== 0) {
-      switch (fedTime) {
-        case 'MO':
-          appendTime = 'in the morning';
-          break;
-        case 'AF':
-          appendTime = 'in the afternoon';
-          break;
-        case 'EV':
-          appendTime = 'in the evening';
-          break;
-        case 'NI':
-          appendTime = 'at night';
-          break;
-        default:
-          appendTime = `at ${fedTime}`
-      }
-      speechText = speechText + `${name} was last fed ` + appendDate + appendTime;
+        switch (fedTime) {
+            case 'MO':
+                appendTime = 'in the morning';
+                break;
+            case 'AF':
+                appendTime = 'in the afternoon';
+                break;
+            case 'EV':
+                appendTime = 'in the evening';
+                break;
+            case 'NI':
+                appendTime = 'at night';
+                break;
+            default:
+                appendTime = `at ${fedTime}`
+        }
+        speechText = speechText + `${name} was last fed ` + appendTime;
     }
 
     return handlerInput.responseBuilder
@@ -95,7 +117,7 @@ const CapturePetNameIntentHandler = {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes() || {};
     const name = sessionAttributes.hasOwnProperty("name") ? sessionAttributes.name : null;
-
+    
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
       handlerInput.requestEnvelope.request.intent.name === "CapturePetNameIntent" && name === null
@@ -112,9 +134,9 @@ const CapturePetNameIntentHandler = {
     const speechText = `Thanks, I'll remember ${name}'s name.  When was the last time you fed ${name}?`;
     const repromptText = `When was the last time you fed ${name}? You can say this morning, 8am, or now.`;
     return handlerInput.responseBuilder
-      .speak(speechText)
-      .reprompt(repromptText)
-      .getResponse();
+        .speak(speechText)
+        .reprompt(repromptText)
+        .getResponse();
   }
 };
 
@@ -125,10 +147,10 @@ const CaptureLastFedIntentHandler = {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes() || {};
     const name = sessionAttributes.name;
-
+    
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-      handlerInput.requestEnvelope.request.intent.name === "CaptureLastFedIntent" &&
+      handlerInput.requestEnvelope.request.intent.name === "CaptureLastFedIntent" && 
       name !== null
     );
   },
@@ -137,14 +159,13 @@ const CaptureLastFedIntentHandler = {
     const sessionAttributes = attributesManager.getSessionAttributes();
     const name = sessionAttributes.name;
     const fedTime = handlerInput.requestEnvelope.request.intent.slots.time.value;
-    let fedDate = handlerInput.requestEnvelope.request.intent.slots.day.value;
+    // const fedDate = handlerInput.requestEnvelope.request.intent.slots.day.value;
     // const fedDuration = handlerInput.requestEnvelope.request.intent.slots.duration.value;
-
 
     const petAttributes = {
       name: name,
-      fedTime: fedTime,
-      fedDate: fedDate
+      fedTime: fedTime
+    //   fedDate: fedDate
     }
 
     attributesManager.setPersistentAttributes(petAttributes);
@@ -152,32 +173,29 @@ const CaptureLastFedIntentHandler = {
 
     let speechText = `Great! I'll remember ${name} was last fed `;
     let appendText
-
-    if (fedTime !== 0) {
-      switch (fedTime) {
+    
+    switch (fedTime) {
         case 'MO':
-          appendText = 'in the morning';
-          break;
+            appendText = 'in the morning';
+            break;
         case 'AF':
-          appendText = 'in the afternoon';
-          break;
+            appendText = 'in the afternoon';
+            break;
         case 'EV':
-          appendText = 'in the evening';
-          break;
+            appendText = 'in the evening';
+            break;
         case 'NI':
-          appendText = 'at night';
-          break;
+            appendText = 'at night';
+            break;
         default:
-          appendText = `at ${fedTime}`
-      }
-      speechText = speechText + appendText;
+            appendText = `at ${fedTime}`
     }
-
-
-
+    
+    speechText = speechText + appendText;
+    
     return handlerInput.responseBuilder
-      .speak(speechText)
-      .getResponse();
+        .speak(speechText)
+        .getResponse();
   }
 }
 

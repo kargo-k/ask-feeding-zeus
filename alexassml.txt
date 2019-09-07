@@ -1,0 +1,49 @@
+------emphasis---------
+
+<speak>
+    I already told you I 
+    <emphasis level="strong">really like</emphasis> 
+    that person.
+</speak> 
+
+--------pitch---------
+
+<speak>
+    Normal volume for the first sentence.
+    <prosody volume="x-loud">Louder volume for the second sentence</prosody>.
+    When I wake up, <prosody rate="x-slow">I speak quite slowly</prosody>.
+    I can speak with my normal pitch, 
+    <prosody pitch="x-high"> but also with a much higher pitch </prosody>, 
+    and also <prosody pitch="low">with a lower pitch</prosody>.
+</speak>
+
+--------whisper---------
+
+<speak>
+    I want to tell you a secret. 
+    <amazon:effect name="whispered">I am not a real human.</amazon:effect>.
+    Can you believe it?
+</speak>
+
+
+---------WOW--expletive----------
+<speak>
+    I want to tell you a secret. 
+<say-as interpret-as="interjection">Wow.</say-as>
+<say-as interpret-as="expletive">Wow.</say-as>
+    Can you believe it?
+</speak>
+
+------voices--------
+<speak>
+    Here's a surprise you did not expect.  
+    <voice name="Kendra"><lang xml:lang="en-US">I want to tell you a secret.</lang></voice>
+    <voice name="Brian"><lang xml:lang="en-GB">Your secret is safe with me!</lang></voice>	
+    <voice name="Kendra"><lang xml:lang="en-US">I am not a real human.</lang></voice>.
+    Can you believe it?
+</speak>
+
+------lang---------
+<speak>
+    In Paris, they pronounce it <lang xml:lang="fr-FR">Paris</lang>
+</speak> 
